@@ -78,6 +78,7 @@ const TEST_CONFIG: AppConfig = {
     stripBackticks: true,
     stripMarkdownArtifacts: true,
     stripUrlProtocol: true,
+    stripEmoji: true,
     collapseWhitespace: true,
     maxTextChars: 5000,
   },

@@ -7,6 +7,7 @@ export interface SanitizerConfig {
   stripBackticks: boolean;
   stripMarkdownArtifacts: boolean;
   stripUrlProtocol: boolean;
+  stripEmoji: boolean;
   collapseWhitespace: boolean;
   maxTextChars: number;
 }
@@ -405,6 +406,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
     stripBackticks: parseBoolean(env.TTS_SANITIZE_STRIP_BACKTICKS, true),
     stripMarkdownArtifacts: parseBoolean(env.TTS_SANITIZE_STRIP_MARKDOWN, true),
     stripUrlProtocol: parseBoolean(env.TTS_SANITIZE_STRIP_URL_PROTOCOL, true),
+    stripEmoji: parseBoolean(env.TTS_SANITIZE_STRIP_EMOJI, true),
     collapseWhitespace: parseBoolean(env.TTS_SANITIZE_COLLAPSE_WHITESPACE, true),
     maxTextChars: parsePositiveInt(env.TTS_MAX_TEXT_CHARS, 5000),
   };

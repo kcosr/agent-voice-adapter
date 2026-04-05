@@ -31,6 +31,7 @@
     "stripBackticks": true,
     "stripMarkdownArtifacts": true,
     "stripUrlProtocol": true,
+    "stripEmoji": true,
     "collapseWhitespace": true,
     "maxTextChars": 15000
   }
