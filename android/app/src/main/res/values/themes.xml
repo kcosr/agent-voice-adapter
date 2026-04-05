@@ -1,0 +1,18 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+  <style name="Theme.AgentVoiceAdapterAndroid" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+    <item name="colorPrimary">@color/blue600</item>
+    <item name="colorPrimaryVariant">@color/blue700</item>
+    <item name="colorSecondary">@color/blue600</item>
+    <item name="colorOnPrimary">@color/onPrimary</item>
+    <item name="colorOnSecondary">@color/onPrimary</item>
+    <item name="colorSurface">@color/surface</item>
+    <item name="colorOnSurface">@color/onSurface</item>
+    <item name="android:colorBackground">@color/background</item>
+    <item name="android:statusBarColor">@color/headerBackground</item>
+    <item name="android:navigationBarColor">@color/background</item>
+    <item name="android:windowLightStatusBar" tools:targetApi="m">false</item>
+    <item name="android:textColorPrimary">@color/slate900</item>
+    <item name="android:textColorSecondary">@color/slate600</item>
+    <item name="android:textColorHint">@color/slate400</item>
+  </style>
+</resources>

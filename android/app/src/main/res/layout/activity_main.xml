@@ -1,0 +1,833 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  android:id="@+id/root_content"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent"
+  android:background="@color/background"
+  android:orientation="vertical">
+
+  <!-- ─── Header bar ─── -->
+  <LinearLayout
+    android:id="@+id/app_header_bar"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/headerBackground"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:paddingHorizontal="20dp"
+    android:paddingTop="12dp"
+    android:paddingBottom="14dp">
+
+    <TextView
+      android:id="@+id/title"
+      android:layout_width="0dp"
+      android:layout_height="wrap_content"
+      android:layout_weight="1"
+      android:text="Agent Voice Adapter"
+      android:textColor="@color/onPrimary"
+      android:textSize="20sp"
+      android:textStyle="bold" />
+
+    <ImageButton
+      android:id="@+id/send_to_agent_button"
+      android:layout_width="40dp"
+      android:layout_height="40dp"
+      android:layout_marginEnd="8dp"
+      android:background="?android:attr/selectableItemBackgroundBorderless"
+      android:contentDescription="Start verbatim send to selected session"
+      android:padding="6dp"
+      android:src="@drawable/ic_send_24"
+      android:tint="@color/slate400" />
+
+    <ImageButton
+      android:id="@+id/voice_to_agent_button"
+      android:layout_width="40dp"
+      android:layout_height="40dp"
+      android:layout_marginEnd="10dp"
+      android:background="?android:attr/selectableItemBackgroundBorderless"
+      android:contentDescription="Start voice to selected session"
+      android:padding="6dp"
+      android:src="@drawable/ic_chat_bubble_outline_24"
+      android:tint="@color/slate400" />
+
+    <ImageButton
+      android:id="@+id/activate_client_button"
+      android:layout_width="40dp"
+      android:layout_height="40dp"
+      android:background="?android:attr/selectableItemBackgroundBorderless"
+      android:contentDescription="Activate this device"
+      android:padding="5dp"
+      android:src="@drawable/ic_active_client_outline_24"
+      android:tint="@color/slate400" />
+  </LinearLayout>
+
+  <!-- ─── Selected session status ─── -->
+  <TextView
+    android:id="@+id/active_agent_status_text"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/headerSubBackground"
+    android:paddingHorizontal="20dp"
+    android:paddingVertical="8dp"
+    android:text="Selected session: Global"
+    android:textColor="@color/headerSubText"
+    android:textSize="13sp" />
+
+  <!-- ─── Body content (scrollable) ─── -->
+  <LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="0dp"
+    android:layout_weight="1"
+    android:orientation="vertical"
+    android:paddingHorizontal="12dp"
+    android:paddingTop="12dp">
+
+    <!-- Action buttons row -->
+    <LinearLayout
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:gravity="center_vertical"
+      android:orientation="horizontal">
+
+      <Button
+        android:id="@+id/settings_toggle_button"
+        android:layout_width="0dp"
+        android:layout_height="44dp"
+        android:layout_marginEnd="8dp"
+        android:layout_weight="1"
+        android:background="@drawable/bg_button_secondary"
+        android:paddingHorizontal="16dp"
+        android:stateListAnimator="@null"
+        android:text="Show Settings"
+        android:textAllCaps="false"
+        android:textColor="@color/slate700"
+        android:textSize="14sp" />
+
+      <Button
+        android:id="@+id/agent_sessions_button"
+        android:layout_width="0dp"
+        android:layout_height="44dp"
+        android:layout_weight="1"
+        android:background="@drawable/bg_button_secondary"
+        android:paddingHorizontal="16dp"
+        android:stateListAnimator="@null"
+        android:text="Agent Sessions"
+        android:textAllCaps="false"
+        android:textColor="@color/slate700"
+        android:textSize="14sp" />
+    </LinearLayout>
+
+    <!-- ─── Settings section ─── -->
+    <androidx.core.widget.NestedScrollView
+      android:id="@+id/settings_section"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="12dp"
+      android:fillViewport="true"
+      android:maxHeight="400dp"
+      android:visibility="gone">
+
+      <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <!-- ── Server settings card ── -->
+        <LinearLayout
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:background="@drawable/bg_card"
+          android:orientation="vertical"
+          android:padding="16dp">
+
+          <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Server Settings"
+            android:textColor="@color/slate900"
+            android:textSize="15sp"
+            android:textStyle="bold" />
+
+          <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:text="Server-side defaults that affect all clients"
+            android:textColor="@color/slate500"
+            android:textSize="12sp" />
+
+          <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            android:text="API Base URL"
+            android:textColor="@color/slate600"
+            android:textSize="13sp" />
+
+          <EditText
+            android:id="@+id/api_url_input"
+            android:layout_width="match_parent"
+            android:layout_height="44dp"
+            android:layout_marginTop="4dp"
+            android:background="@drawable/bg_input"
+            android:hint="http://10.0.2.2:4300"
+            android:inputType="textUri"
+            android:paddingHorizontal="12dp"
+            android:singleLine="true"
+            android:textColor="@color/slate900"
+            android:textColorHint="@color/slate400"
+            android:textSize="14sp" />
+
+          <Button
+            android:id="@+id/load_server_settings_button"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/bg_button_secondary"
+            android:stateListAnimator="@null"
+            android:text="Load Server Settings"
+            android:textAllCaps="false"
+            android:textColor="@color/slate700"
+            android:textSize="13sp" />
+
+          <!-- Timeout inputs -->
+          <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+              android:layout_width="0dp"
+              android:layout_height="wrap_content"
+              android:layout_weight="1"
+              android:text="Start timeout (ms)"
+              android:textColor="@color/slate600"
+              android:textSize="13sp" />
+
+            <EditText
+              android:id="@+id/server_listen_start_timeout_input"
+              android:layout_width="0dp"
+              android:layout_height="40dp"
+              android:layout_weight="1"
+              android:background="@drawable/bg_input"
+              android:hint="30000"
+              android:inputType="number"
+              android:paddingHorizontal="12dp"
+              android:singleLine="true"
+              android:textColor="@color/slate900"
+              android:textColorHint="@color/slate400"
+              android:textSize="13sp" />
+          </LinearLayout>
+
+          <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+              android:layout_width="0dp"
+              android:layout_height="wrap_content"
+              android:layout_weight="1"
+              android:text="Completion timeout (ms)"
+              android:textColor="@color/slate600"
+              android:textSize="13sp" />
+
+            <EditText
+              android:id="@+id/server_listen_completion_timeout_input"
+              android:layout_width="0dp"
+              android:layout_height="40dp"
+              android:layout_weight="1"
+              android:background="@drawable/bg_input"
+              android:hint="60000"
+              android:inputType="number"
+              android:paddingHorizontal="12dp"
+              android:singleLine="true"
+              android:textColor="@color/slate900"
+              android:textColorHint="@color/slate400"
+              android:textSize="13sp" />
+          </LinearLayout>
+
+          <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+              android:layout_width="0dp"
+              android:layout_height="wrap_content"
+              android:layout_weight="1"
+              android:text="End silence (ms)"
+              android:textColor="@color/slate600"
+              android:textSize="13sp" />
+
+            <EditText
+              android:id="@+id/server_end_silence_input"
+              android:layout_width="0dp"
+              android:layout_height="40dp"
+              android:layout_weight="1"
+              android:background="@drawable/bg_input"
+              android:hint="1200"
+              android:inputType="number"
+              android:paddingHorizontal="12dp"
+              android:singleLine="true"
+              android:textColor="@color/slate900"
+              android:textColorHint="@color/slate400"
+              android:textSize="13sp" />
+          </LinearLayout>
+
+          <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+              android:layout_width="0dp"
+              android:layout_height="wrap_content"
+              android:layout_weight="1"
+              android:text="Queue delay (ms)"
+              android:textColor="@color/slate600"
+              android:textSize="13sp" />
+
+            <EditText
+              android:id="@+id/server_queue_advance_delay_input"
+              android:layout_width="0dp"
+              android:layout_height="40dp"
+              android:layout_weight="1"
+              android:background="@drawable/bg_input"
+              android:hint="2000"
+              android:inputType="number"
+              android:paddingHorizontal="12dp"
+              android:singleLine="true"
+              android:textColor="@color/slate900"
+              android:textColorHint="@color/slate400"
+              android:textSize="13sp" />
+          </LinearLayout>
+
+          <Switch
+            android:id="@+id/server_prepend_linked_session_label_switch"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:minHeight="44dp"
+            android:text="Prefix linked-session label in spoken TTS"
+            android:textColor="@color/slate700"
+            android:textSize="14sp" />
+
+          <Button
+            android:id="@+id/apply_server_settings_button"
+            android:layout_width="match_parent"
+            android:layout_height="44dp"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/bg_button_primary"
+            android:stateListAnimator="@null"
+            android:text="Apply Server Settings"
+            android:textAllCaps="false"
+            android:textColor="@color/onPrimary"
+            android:textSize="14sp" />
+        </LinearLayout>
+
+        <!-- ── Client settings card ── -->
+        <LinearLayout
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:layout_marginTop="12dp"
+          android:background="@drawable/bg_card"
+          android:orientation="vertical"
+          android:padding="16dp">
+
+          <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Client Settings"
+            android:textColor="@color/slate900"
+            android:textSize="15sp"
+            android:textStyle="bold" />
+
+          <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:text="Settings for this device only"
+            android:textColor="@color/slate500"
+            android:textSize="12sp" />
+
+          <Switch
+            android:id="@+id/service_switch"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:minHeight="44dp"
+            android:text="Run foreground service"
+            android:textColor="@color/slate700"
+            android:textSize="14sp" />
+
+          <TextView
+            android:id="@+id/active_client_status_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:paddingHorizontal="4dp"
+            android:text="Active device: unknown"
+            android:textColor="@color/slate500"
+            android:textSize="13sp" />
+
+          <!-- Toggles group -->
+          <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginVertical="10dp"
+            android:background="@color/slate100" />
+
+          <Switch
+            android:id="@+id/speech_switch"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="44dp"
+            android:text="Speech playback enabled"
+            android:textColor="@color/slate700"
+            android:textSize="14sp" />
+
+          <Switch
+            android:id="@+id/listen_switch"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="44dp"
+            android:text="Listening enabled"
+            android:textColor="@color/slate700"
+            android:textSize="14sp" />
+
+          <Switch
+            android:id="@+id/wake_switch"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="44dp"
+            android:text="Ambient wake mode"
+            android:textColor="@color/slate700"
+            android:textSize="14sp" />
+
+          <Switch
+            android:id="@+id/continuous_focus_switch"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="44dp"
+            android:text="Continuous speech focus (TTS -> recognition)"
+            android:textColor="@color/slate700"
+            android:textSize="14sp" />
+
+          <Switch
+            android:id="@+id/pause_external_media_switch"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="44dp"
+            android:text="Pause external media during turn"
+            android:textColor="@color/slate700"
+            android:textSize="14sp" />
+
+          <!-- Audio settings group -->
+          <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginVertical="10dp"
+            android:background="@color/slate100" />
+
+          <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Recognition cue mode"
+            android:textColor="@color/slate600"
+            android:textSize="13sp" />
+
+          <Spinner
+            android:id="@+id/recognition_cue_mode_spinner"
+            android:layout_width="match_parent"
+            android:layout_height="44dp"
+            android:layout_marginTop="4dp"
+            android:background="@drawable/bg_input" />
+
+          <Switch
+            android:id="@+id/status_bar_switch"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:minHeight="44dp"
+            android:text="Show status bar"
+            android:textColor="@color/slate700"
+            android:textSize="14sp" />
+
+          <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Theme"
+            android:textColor="@color/slate600"
+            android:textSize="13sp" />
+
+          <Spinner
+            android:id="@+id/theme_spinner"
+            android:layout_width="match_parent"
+            android:layout_height="44dp"
+            android:layout_marginTop="4dp"
+            android:background="@drawable/bg_input" />
+
+          <!-- Gain sliders -->
+          <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginVertical="10dp"
+            android:background="@color/slate100" />
+
+          <TextView
+            android:id="@+id/tts_gain_value_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="TTS gain: 100%"
+            android:textColor="@color/slate700"
+            android:textSize="13sp" />
+
+          <SeekBar
+            android:id="@+id/tts_gain_slider"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:max="500"
+            android:min="25"
+            android:progress="100" />
+
+          <TextView
+            android:id="@+id/recognition_cue_gain_value_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="Recognition cue gain: 100%"
+            android:textColor="@color/slate700"
+            android:textSize="13sp" />
+
+          <SeekBar
+            android:id="@+id/recognition_cue_gain_slider"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:max="500"
+            android:min="25"
+            android:progress="100" />
+
+          <!-- Buffer inputs -->
+          <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginVertical="10dp"
+            android:background="@color/slate100" />
+
+          <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+              android:layout_width="0dp"
+              android:layout_height="wrap_content"
+              android:layout_weight="1"
+              android:text="Playback buffer (ms)"
+              android:textColor="@color/slate600"
+              android:textSize="13sp" />
+
+            <EditText
+              android:id="@+id/playback_buffer_input"
+              android:layout_width="0dp"
+              android:layout_height="40dp"
+              android:layout_weight="1"
+              android:background="@drawable/bg_input"
+              android:hint="500"
+              android:inputType="number"
+              android:paddingHorizontal="12dp"
+              android:singleLine="true"
+              android:textColor="@color/slate900"
+              android:textColorHint="@color/slate400"
+              android:textSize="13sp" />
+          </LinearLayout>
+
+          <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+              android:layout_width="0dp"
+              android:layout_height="wrap_content"
+              android:layout_weight="1"
+              android:text="Startup pre-roll (ms)"
+              android:textColor="@color/slate600"
+              android:textSize="13sp" />
+
+            <EditText
+              android:id="@+id/playback_startup_preroll_input"
+              android:layout_width="0dp"
+              android:layout_height="40dp"
+              android:layout_weight="1"
+              android:background="@drawable/bg_input"
+              android:hint="200"
+              android:inputType="number"
+              android:paddingHorizontal="12dp"
+              android:singleLine="true"
+              android:textColor="@color/slate900"
+              android:textColorHint="@color/slate400"
+              android:textSize="13sp" />
+          </LinearLayout>
+
+          <!-- Mic device -->
+          <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginVertical="10dp"
+            android:background="@color/slate100" />
+
+          <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Microphone input"
+            android:textColor="@color/slate600"
+            android:textSize="13sp" />
+
+          <Spinner
+            android:id="@+id/mic_device_spinner"
+            android:layout_width="match_parent"
+            android:layout_height="44dp"
+            android:layout_marginTop="4dp"
+            android:background="@drawable/bg_input" />
+
+          <!-- Action buttons -->
+          <Button
+            android:id="@+id/apply_button"
+            android:layout_width="match_parent"
+            android:layout_height="44dp"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/bg_button_primary"
+            android:stateListAnimator="@null"
+            android:text="Apply"
+            android:textAllCaps="false"
+            android:textColor="@color/onPrimary"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
+          <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:orientation="horizontal">
+
+            <Button
+              android:id="@+id/loopback_test_button"
+              android:layout_width="0dp"
+              android:layout_height="40dp"
+              android:layout_marginEnd="6dp"
+              android:layout_weight="1"
+              android:background="@drawable/bg_button_secondary"
+              android:stateListAnimator="@null"
+              android:text="Loopback"
+              android:textAllCaps="false"
+              android:textColor="@color/slate600"
+              android:textSize="13sp" />
+
+            <Button
+              android:id="@+id/test_cue_button"
+              android:layout_width="0dp"
+              android:layout_height="40dp"
+              android:layout_marginEnd="6dp"
+              android:layout_weight="1"
+              android:background="@drawable/bg_button_secondary"
+              android:stateListAnimator="@null"
+              android:text="Test Cue"
+              android:textAllCaps="false"
+              android:textColor="@color/slate600"
+              android:textSize="13sp" />
+
+            <Button
+              android:id="@+id/background_settings_button"
+              android:layout_width="0dp"
+              android:layout_height="40dp"
+              android:layout_weight="1"
+              android:background="@drawable/bg_button_secondary"
+              android:stateListAnimator="@null"
+              android:text="Battery"
+              android:textAllCaps="false"
+              android:textColor="@color/slate600"
+              android:textSize="13sp" />
+          </LinearLayout>
+
+          <Button
+            android:id="@+id/clear_chat_button"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/bg_button_destructive"
+            android:stateListAnimator="@null"
+            android:text="Clear Responses"
+            android:textAllCaps="false"
+            android:textColor="@color/red700"
+            android:textSize="13sp" />
+
+          <TextView
+            android:id="@+id/hint_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:lineSpacingMultiplier="1.2"
+            android:text="Enable mic permission and keep this service running for background wake/listen behavior. To use a headset mic, connect it first, select it in Microphone input, then tap Apply."
+            android:textColor="@color/slate500"
+            android:textSize="12sp" />
+
+          <TextView
+            android:id="@+id/mic_route_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:text="Active mic route: unknown"
+            android:textColor="@color/slate500"
+            android:textSize="12sp" />
+        </LinearLayout>
+      </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+    <!-- ─── Status text ─── -->
+    <TextView
+      android:id="@+id/status_text"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="10dp"
+      android:paddingHorizontal="4dp"
+      android:text="Idle"
+      android:textColor="@color/slate500"
+      android:textSize="12sp" />
+
+    <HorizontalScrollView
+      android:id="@+id/session_filter_scroll"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="8dp"
+      android:fillViewport="true"
+      android:scrollbars="none">
+
+      <LinearLayout
+        android:id="@+id/session_filter_chip_container"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingHorizontal="2dp" />
+    </HorizontalScrollView>
+
+    <!-- ─── Chat responses area ─── -->
+    <LinearLayout
+      android:layout_width="match_parent"
+      android:layout_height="0dp"
+      android:layout_marginTop="10dp"
+      android:layout_weight="1"
+      android:background="@drawable/bg_chat_area"
+      android:orientation="vertical"
+      android:padding="10dp">
+
+      <ScrollView
+        android:id="@+id/chat_scroll_view"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true">
+
+        <LinearLayout
+          android:id="@+id/chat_container"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:orientation="vertical" />
+      </ScrollView>
+    </LinearLayout>
+  </LinearLayout>
+
+  <!-- ─── Status bar (fixed at bottom) ─── -->
+  <LinearLayout
+    android:id="@+id/status_bar_container"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/surface"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:paddingHorizontal="12dp"
+    android:paddingVertical="6dp"
+    android:visibility="gone">
+
+    <TextView
+      android:id="@+id/status_chip_ws"
+      android:layout_width="0dp"
+      android:layout_height="wrap_content"
+      android:layout_marginEnd="4dp"
+      android:layout_weight="1"
+      android:background="@drawable/bg_status_chip"
+      android:gravity="center"
+      android:padding="5dp"
+      android:text="WS: --"
+      android:textColor="@color/slate700"
+      android:textSize="11sp" />
+
+    <TextView
+      android:id="@+id/status_chip_audio"
+      android:layout_width="0dp"
+      android:layout_height="wrap_content"
+      android:layout_marginEnd="4dp"
+      android:layout_weight="1"
+      android:background="@drawable/bg_status_chip"
+      android:gravity="center"
+      android:padding="5dp"
+      android:text="Audio: --"
+      android:textColor="@color/slate700"
+      android:textSize="11sp" />
+
+    <TextView
+      android:id="@+id/status_chip_media"
+      android:layout_width="0dp"
+      android:layout_height="wrap_content"
+      android:layout_marginEnd="4dp"
+      android:layout_weight="1"
+      android:background="@drawable/bg_status_chip"
+      android:gravity="center"
+      android:padding="5dp"
+      android:text="Media: --"
+      android:textColor="@color/slate700"
+      android:textSize="11sp" />
+
+    <TextView
+      android:id="@+id/status_chip_music"
+      android:layout_width="0dp"
+      android:layout_height="wrap_content"
+      android:layout_weight="1"
+      android:background="@drawable/bg_status_chip"
+      android:gravity="center"
+      android:padding="5dp"
+      android:text="Music: --"
+      android:textColor="@color/slate700"
+      android:textSize="11sp" />
+  </LinearLayout>
+
+  <!-- ─── Recognition indicator ─── -->
+  <TextView
+    android:id="@+id/recognition_indicator_text"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_recognition_indicator"
+    android:gravity="center"
+    android:paddingVertical="10dp"
+    android:text="Listening for your response..."
+    android:textColor="@color/blue600"
+    android:textSize="14sp"
+    android:textStyle="bold"
+    android:visibility="gone" />
+</LinearLayout>

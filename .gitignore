@@ -1,0 +1,43 @@
+# Node
+node_modules/
+npm-debug.log*
+yarn.lock
+pnpm-lock.yaml
+
+# Build output
+dist/
+**/dist/
+build/
+coverage/
+.nyc_output/
+*.tsbuildinfo
+.release-notes-tmp.md
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Logs
+logs/
+*.log
+*.jsonl
+
+# Python
+__pycache__/
+*.pyc
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Project-specific
+.codemap/
+android/.gradle/
+android/local.properties
+android/local-version-code.txt
+android/**/build/

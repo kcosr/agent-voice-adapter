@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent"
+  android:background="@color/surfaceContainer"
+  android:orientation="vertical"
+  android:padding="14dp">
+
+  <LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_card"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:paddingHorizontal="14dp"
+    android:paddingVertical="10dp">
+
+    <TextView
+      android:layout_width="0dp"
+      android:layout_height="wrap_content"
+      android:layout_weight="1"
+      android:text="Agent Sessions"
+      android:textColor="@color/slate900"
+      android:textSize="18sp"
+      android:textStyle="bold" />
+
+    <ImageButton
+      android:id="@+id/session_dispatch_close_button"
+      android:layout_width="36dp"
+      android:layout_height="36dp"
+      android:background="?android:attr/selectableItemBackgroundBorderless"
+      android:contentDescription="Close sessions dialog"
+      android:padding="6dp"
+      android:src="@drawable/ic_close_24"
+      android:tint="@color/slate600" />
+  </LinearLayout>
+
+  <TextView
+    android:id="@+id/session_dispatch_hint_text"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="10dp"
+    android:text="Select a session, enter a message, then send it to the selected session."
+    android:textColor="@color/slate500"
+    android:textSize="13sp" />
+
+  <EditText
+    android:id="@+id/session_dispatch_filter_input"
+    android:layout_width="match_parent"
+    android:layout_height="44dp"
+    android:layout_marginTop="12dp"
+    android:background="@drawable/bg_input"
+    android:hint="Filter by workspace or resolved title"
+    android:paddingHorizontal="12dp"
+    android:singleLine="true"
+    android:textColor="@color/slate900"
+    android:textColorHint="@color/slate400"
+    android:textSize="14sp" />
+
+  <Button
+    android:id="@+id/session_dispatch_refresh_button"
+    android:layout_width="wrap_content"
+    android:layout_height="40dp"
+    android:layout_marginTop="10dp"
+    android:background="@drawable/bg_button_secondary"
+    android:paddingHorizontal="20dp"
+    android:stateListAnimator="@null"
+    android:text="Refresh Sessions"
+    android:textAllCaps="false"
+    android:textColor="@color/slate700"
+    android:textSize="13sp" />
+
+  <ProgressBar
+    android:id="@+id/session_dispatch_progress"
+    style="?android:attr/progressBarStyleSmall"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="8dp"
+    android:visibility="gone" />
+
+  <ListView
+    android:id="@+id/session_dispatch_list"
+    android:layout_width="match_parent"
+    android:layout_height="0dp"
+    android:layout_marginTop="10dp"
+    android:layout_weight="1"
+    android:background="@drawable/bg_chat_area"
+    android:divider="@android:color/transparent"
+    android:dividerHeight="6dp"
+    android:padding="8dp"
+    android:clipToPadding="false"
+    android:drawSelectorOnTop="false" />
+
+  <Button
+    android:id="@+id/session_dispatch_clear_session_button"
+    android:layout_width="match_parent"
+    android:layout_height="44dp"
+    android:layout_marginTop="10dp"
+    android:background="@drawable/bg_button_secondary"
+    android:stateListAnimator="@null"
+    android:text="Clear Selected Session Messages"
+    android:textAllCaps="false"
+    android:textColor="@color/slate700"
+    android:textSize="14sp" />
+
+  <EditText
+    android:id="@+id/session_dispatch_custom_message_input"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="12dp"
+    android:background="@drawable/bg_input"
+    android:gravity="top|start"
+    android:hint="Message to selected session"
+    android:minLines="3"
+    android:padding="12dp"
+    android:textColor="@color/slate900"
+    android:textColorHint="@color/slate400"
+    android:textSize="14sp" />
+
+  <Button
+    android:id="@+id/session_dispatch_send_button"
+    android:layout_width="match_parent"
+    android:layout_height="44dp"
+    android:layout_marginTop="10dp"
+    android:background="@drawable/bg_button_secondary"
+    android:stateListAnimator="@null"
+    android:text="Send to Selected Session"
+    android:textAllCaps="false"
+    android:textColor="@color/slate700"
+    android:textSize="14sp" />
+
+  <TextView
+    android:id="@+id/session_dispatch_status_text"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="8dp"
+    android:textColor="@color/slate600"
+    android:textSize="12sp" />
+</LinearLayout>

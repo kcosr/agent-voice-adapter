@@ -1,0 +1,37 @@
+{
+  "port": 4300,
+  "tts": {
+    "provider": "elevenlabs"
+  },
+  "elevenLabs": {
+    "apiKey": "REPLACE_WITH_ELEVENLABS_API_KEY",
+    "voiceId": "VUGQSU6BSEjkbudnJbOj",
+    "modelId": "eleven_multilingual_v2",
+    "baseUrl": "https://api.elevenlabs.io",
+    "outputFormat": "pcm_24000"
+  },
+  "asr": {
+    "provider": "openai",
+    "recognitionStartTimeoutMs": 30000,
+    "recognitionCompletionTimeoutMs": 60000,
+    "recognitionEndSilenceMs": 2000,
+    "queueAdvanceDelayMs": 2000
+  },
+  "openaiAsr": {
+    "apiKey": "REPLACE_WITH_OPENAI_API_KEY",
+    "modelId": "gpt-4o-mini-transcribe",
+    "baseUrl": "https://api.openai.com",
+    "timeoutMs": 60000
+  },
+  "wakeIntent": {
+    "allowRemote": false,
+    "sharedSecret": ""
+  },
+  "sanitizer": {
+    "stripBackticks": true,
+    "stripMarkdownArtifacts": true,
+    "stripUrlProtocol": true,
+    "collapseWhitespace": true,
+    "maxTextChars": 15000
+  }
+}

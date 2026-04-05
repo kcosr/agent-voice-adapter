@@ -1,0 +1,47 @@
+{
+  "name": "agent-voice-adapter",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Local streaming TTS widget server and CLI with pluggable providers",
+  "main": "dist/server/index.js",
+  "bin": {
+    "agent-voice-adapter-cli": "dist/cli/agent-voice-adapter-cli.js"
+  },
+  "scripts": {
+    "dev": "tsx watch src/server/index.ts",
+    "build": "tsc -p tsconfig.json && node scripts/embed-cli-version.mjs && node scripts/ensure-cli-executable.mjs",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --maxWorkers=1",
+    "test:watch": "vitest --maxWorkers=1",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "format": "biome format --write .",
+    "check": "npm run lint && npm run typecheck && npm run test",
+    "lint-staged": "lint-staged",
+    "prepare": "husky install",
+    "start": "node dist/server/index.js",
+    "cli": "node dist/cli/agent-voice-adapter-cli.js"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx,mjs,cjs,json,css,html}": ["biome format --write"]
+  },
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "ws": "^8.18.1"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.0",
+    "@types/express": "^4.17.21",
+    "@types/node": "^22.13.1",
+    "@types/ws": "^8.5.14",
+    "husky": "^9.1.7",
+    "lint-staged": "^15.2.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3",
+    "vitest": "^4.0.18"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

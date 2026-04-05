@@ -1,0 +1,69 @@
+<resources>
+  <!-- Core brand -->
+  <color name="primary">#0f172a</color>
+  <color name="primaryVariant">#1e293b</color>
+  <color name="secondary">#2563eb</color>
+
+  <!-- Slate palette -->
+  <color name="slate50">#F8FAFC</color>
+  <color name="slate100">#F1F5F9</color>
+  <color name="slate200">#E2E8F0</color>
+  <color name="slate300">#CBD5E1</color>
+  <color name="slate400">#94A3B8</color>
+  <color name="slate500">#64748B</color>
+  <color name="slate600">#475569</color>
+  <color name="slate700">#334155</color>
+  <color name="slate800">#1E293B</color>
+  <color name="slate900">#0F172A</color>
+
+  <!-- Blue accent -->
+  <color name="blue50">#EFF6FF</color>
+  <color name="blue100">#DBEAFE</color>
+  <color name="blue200">#BFDBFE</color>
+  <color name="blue300">#93C5FD</color>
+  <color name="blue500">#3B82F6</color>
+  <color name="blue600">#2563EB</color>
+  <color name="blue700">#1D4ED8</color>
+
+  <!-- Green accent -->
+  <color name="green50">#F0FDF4</color>
+  <color name="green100">#DCFCE7</color>
+  <color name="green500">#22C55E</color>
+  <color name="green600">#16A34A</color>
+  <color name="green700">#15803D</color>
+  <color name="green800">#166534</color>
+  <color name="green900">#052E16</color>
+
+  <!-- Red accent -->
+  <color name="red50">#FEF2F2</color>
+  <color name="red100">#FEE2E2</color>
+  <color name="red200">#FECACA</color>
+  <color name="red300">#FCA5A5</color>
+  <color name="red600">#DC2626</color>
+  <color name="red700">#B91C1C</color>
+
+  <!-- Orange accent -->
+  <color name="orange50">#FFF7ED</color>
+  <color name="orange500">#F97316</color>
+  <color name="orange600">#EA580C</color>
+
+  <!-- Amber -->
+  <color name="amber100">#FEF3C7</color>
+  <color name="amber200">#FDE68A</color>
+
+  <!-- Cyan -->
+  <color name="cyan700">#0369A1</color>
+
+  <!-- Surfaces -->
+  <color name="surface">#FFFFFF</color>
+  <color name="surfaceContainer">#F8FAFC</color>
+  <color name="background">#F1F5F9</color>
+  <color name="headerBackground">#0F172A</color>
+  <color name="headerSubBackground">#1E293B</color>
+  <color name="headerSubText">#CBD5E1</color>
+
+  <!-- On surfaces -->
+  <color name="onPrimary">#FFFFFF</color>
+  <color name="onSurface">#0F172A</color>
+  <color name="onSurfaceVariant">#475569</color>
+</resources>

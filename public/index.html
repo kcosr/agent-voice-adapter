@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Agent Voice Adapter</title>
+    <script>
+      (() => {
+        try {
+          if (window.localStorage.getItem("agent-voice-adapter-theme") === "dark") {
+            document.documentElement.dataset.theme = "dark";
+          }
+        } catch {
+          // Ignore storage failures.
+        }
+      })();
+    </script>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div class="layout">
+      <!-- Sidebar -->
+      <aside class="sidebar">
+        <div class="brand">
+          <div class="brand-copy">
+            <h1>Agent Voice Adapter</h1>
+            <p class="subtitle">Speech & Recognition Gateway</p>
+          </div>
+          <button
+            id="sidebar-menu-toggle"
+            type="button"
+            class="btn outline sidebar-menu-toggle"
+            aria-expanded="false"
+          >
+            Menu
+          </button>
+        </div>
+
+        <div id="sidebar-sections" class="sidebar-sections">
+          <div id="settings-panel" class="settings-panel">
+            <h3>Controls</h3>
+            <div class="controls-list">
+              <button id="enable-audio" type="button" class="btn">Enable Audio</button>
+              <button id="enable-mic" type="button" class="btn">Enable Mic</button>
+              <button id="loopback-test" type="button" class="btn">Loopback Test</button>
+
+              <div class="control-group">
+                <label for="mic-device-select">Microphone</label>
+                <select id="mic-device-select" disabled>
+                  <option value="">Mic: default</option>
+                </select>
+              </div>
+
+              <button id="wake-toggle" type="button" aria-pressed="false" class="btn toggle-btn">Wake: OFF</button>
+              <button id="speech-toggle" type="button" aria-pressed="true" class="btn toggle-btn">Speech: ON</button>
+              <button id="service-toggle" type="button" aria-pressed="true" class="btn toggle-btn">Service: ON</button>
+              <button id="activate-toggle" type="button" aria-pressed="false" class="btn toggle-btn primary">Activate</button>
+              <button id="theme-toggle" type="button" aria-pressed="false" class="btn toggle-btn">Theme: Light</button>
+            </div>
+          </div>
+
+          <div class="status-panel">
+            <h3>System Status</h3>
+            <ul class="status-list">
+              <li>
+                <span class="label">WebSocket</span>
+                <strong id="ws-status">connecting</strong>
+              </li>
+              <li>
+                <span class="label">Queue</span>
+                <strong id="queue-status">-</strong>
+              </li>
+              <li>
+                <span class="label">Accepting Clients</span>
+                <strong id="accepting-status">-</strong>
+              </li>
+              <li>
+                <span class="label">Playback</span>
+                <strong id="speech-status">on</strong>
+              </li>
+              <li>
+                <span class="label">Recognition</span>
+                <strong id="recognition-status">off</strong>
+              </li>
+              <li>
+                <span class="label">Active Device</span>
+                <strong id="activation-status">unknown</strong>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Main Content -->
+      <main class="main-content">
+        <header class="content-header">
+          <h2>Conversation Log</h2>
+          <div class="agent-controls">
+            <p id="active-agent-label" class="active-agent-label">Active agent: none</p>
+            <div class="agent-actions">
+              <button id="session-voice-active" type="button" class="btn primary">Voice to Active Agent</button>
+              <button id="session-dispatch-open" type="button" class="btn outline">Agent Sessions</button>
+            </div>
+          </div>
+        </header>
+
+        <div id="session-filter-bar" class="session-filter-bar" aria-label="Conversation filters"></div>
+
+        <div id="chat-log" class="chat-log"></div>
+      </main>
+    </div>
+
+    <!-- Modals -->
+    <div id="session-dispatch-modal" class="modal hidden" role="dialog" aria-modal="true">
+      <div class="modal-card">
+        <header class="modal-header">
+          <h2>Agent Sessions</h2>
+          <button id="session-dispatch-close" type="button" class="btn ghost">Close</button>
+        </header>
+        <div class="modal-controls">
+          <input
+            id="session-dispatch-filter"
+            type="text"
+            placeholder="Filter by workspace or title"
+            autocomplete="off"
+            class="input-field"
+          />
+          <button id="session-dispatch-refresh" type="button" class="btn outline">Refresh</button>
+        </div>
+        <p id="session-dispatch-status" class="modal-status">Ready.</p>
+        <div id="session-dispatch-list" class="session-list"></div>
+        
+        <div class="message-area">
+          <label class="modal-label" for="session-dispatch-message">Message</label>
+          <textarea
+            id="session-dispatch-message"
+            rows="4"
+            placeholder="Type a custom message to send to the selected session."
+            class="input-field"
+          ></textarea>
+        </div>
+        <div class="modal-actions">
+          <button id="session-dispatch-make-active" type="button" class="btn outline">Make Active Agent</button>
+          <button id="session-dispatch-send" type="button" class="btn primary">Send to Selected Session</button>
+        </div>
+      </div>
+    </div>
+
+    <script type="module" src="/app.js"></script>
+  </body>
+</html>

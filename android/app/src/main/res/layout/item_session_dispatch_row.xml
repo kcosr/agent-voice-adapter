@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  android:layout_width="match_parent"
+  android:layout_height="wrap_content"
+  android:background="@drawable/session_dispatch_row_selector"
+  android:gravity="center_vertical"
+  android:minHeight="52dp"
+  android:orientation="horizontal"
+  android:paddingLeft="14dp"
+  android:paddingTop="8dp"
+  android:paddingRight="8dp"
+  android:paddingBottom="8dp">
+
+  <TextView
+    android:id="@android:id/text1"
+    android:layout_width="0dp"
+    android:layout_height="wrap_content"
+    android:layout_weight="1"
+    android:gravity="center_vertical"
+    android:singleLine="false"
+    android:textColor="@color/slate900"
+    android:textSize="14sp" />
+
+  <ImageButton
+    android:id="@+id/session_dispatch_row_send_button"
+    android:layout_width="36dp"
+    android:layout_height="36dp"
+    android:layout_marginStart="8dp"
+    android:background="?android:attr/selectableItemBackgroundBorderless"
+    android:contentDescription="Verbatim send to session"
+    android:padding="6dp"
+    android:src="@drawable/ic_send_24"
+    android:tint="@color/blue600" />
+
+  <ImageButton
+    android:id="@+id/session_dispatch_row_voice_button"
+    android:layout_width="36dp"
+    android:layout_height="36dp"
+    android:layout_marginStart="8dp"
+    android:background="?android:attr/selectableItemBackgroundBorderless"
+    android:contentDescription="Voice send to session"
+    android:padding="6dp"
+    android:src="@drawable/ic_chat_bubble_outline_24"
+    android:tint="@color/blue600" />
+</LinearLayout>

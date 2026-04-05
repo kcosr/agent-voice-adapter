@@ -1,0 +1,7 @@
+<resources>
+  <string name="app_name">Agent Voice Adapter</string>
+  <string name="notification_channel_name">Agent Voice Adapter</string>
+  <string name="notification_channel_description">Background voice websocket and recognition loop</string>
+  <string name="notification_title">Agent Voice Adapter</string>
+  <string name="notification_text">Running background voice loop</string>
+</resources>
