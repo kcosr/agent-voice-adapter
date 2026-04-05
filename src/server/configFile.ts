@@ -257,6 +257,11 @@ export function loadFileConfigEnv(env: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
   );
   setFileEnvValue(
     fileEnv,
+    "TTS_SANITIZE_STRIP_EMOJI",
+    readNestedConfigValue(parsed, ["sanitizer", "stripEmoji"]),
+  );
+  setFileEnvValue(
+    fileEnv,
     "TTS_SANITIZE_COLLAPSE_WHITESPACE",
     readNestedConfigValue(parsed, ["sanitizer", "collapseWhitespace"]),
   );

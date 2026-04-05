@@ -402,6 +402,7 @@ For Kokoro and Parakeet, setting `*_SSH_TARGET` runs the Python daemon remotely 
 | `TTS_SANITIZE_STRIP_BACKTICKS` | `true` | Remove backticks |
 | `TTS_SANITIZE_STRIP_MARKDOWN` | `true` | Remove markdown artifacts |
 | `TTS_SANITIZE_STRIP_URL_PROTOCOL` | `true` | Remove URL protocols |
+| `TTS_SANITIZE_STRIP_EMOJI` | `true` | Remove emoji (incl. ZWJ sequences and VS-16) |
 | `TTS_SANITIZE_COLLAPSE_WHITESPACE` | `true` | Collapse whitespace |
 | `TTS_MAX_TEXT_CHARS` | `5000` | Hard max text length |
 
