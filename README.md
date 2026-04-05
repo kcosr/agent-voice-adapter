@@ -6,9 +6,12 @@ A local Node.js + TypeScript application that bridges agent output to voice inte
 
 ### Screenshots
 
-![Web widget](docs/images/web.png)
-
-![Mobile app](docs/images/mobile.png)
+<table>
+  <tr>
+    <td valign="top"><img src="docs/images/web.png" alt="Web widget" width="600"></td>
+    <td valign="top"><img src="docs/images/mobile.png" alt="Mobile app" width="200"></td>
+  </tr>
+</table>
 
 ## Table of Contents
 
