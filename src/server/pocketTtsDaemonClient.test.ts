@@ -121,6 +121,47 @@ for line in sys.stdin:
         pass
 `;
 
+const SLOW_READY_SCRIPT = `
+import base64
+import json
+import sys
+import threading
+import time
+
+active = False
+active_lock = threading.Lock()
+
+def emit(payload):
+    sys.stdout.write(json.dumps(payload, separators=(",", ":")) + "\\n")
+    sys.stdout.flush()
+
+def synth(message):
+    global active
+    request_id = message["request_id"]
+    emit({"type": "started", "request_id": request_id, "sample_rate": 16000})
+    emit({
+        "type": "audio",
+        "request_id": request_id,
+        "chunk_base64": base64.b64encode(request_id.encode()).decode("ascii"),
+    })
+    time.sleep(0.05)
+    with active_lock:
+        active = False
+    emit({"type": "done", "request_id": request_id})
+
+time.sleep(0.2)
+emit({"type": "ready"})
+for line in sys.stdin:
+    message = json.loads(line)
+    if message.get("type") == "synthesize":
+        with active_lock:
+            if active:
+                emit({"type": "error", "request_id": message["request_id"], "error": "busy"})
+                continue
+            active = True
+        threading.Thread(target=synth, args=(message,), daemon=True).start()
+`;
+
 function createTempScript(contents: string): { dir: string; scriptPath: string } {
   const dir = mkdtempSync(path.join(os.tmpdir(), "pocket-daemon-test-"));
   const scriptPath = path.join(dir, "daemon.py");
@@ -172,6 +213,77 @@ describe.skipIf(!PYTHON_BIN)("PocketTtsDaemonClient", () => {
     expect(chunks.length).toBeGreaterThan(0);
     expect(chunks[0].toString("utf8")).toBe("chunk-0");
     expect(errors).toEqual([]);
+  });
+
+  test("serializes concurrent requests queued before daemon ready", async () => {
+    const { dir, scriptPath } = createTempScript(SLOW_READY_SCRIPT);
+    tempDirs.push(dir);
+    const chunks: Buffer[] = [];
+    const createClient = () =>
+      new PocketTtsDaemonClient({
+        pythonBin,
+        scriptPath,
+        voiceId: "alba",
+        modelId: "english",
+        language: "english",
+        device: "cpu",
+        quantize: false,
+        maxTokensPerChunk: 50,
+        hardCancelTimeoutMs: 500,
+        abortSignal: new AbortController().signal,
+        onAudioChunk: (pcmBytes) => chunks.push(Buffer.from(pcmBytes)),
+        onError: () => {},
+        log: () => {},
+      });
+    const first = createClient();
+    const second = createClient();
+
+    await first.sendText("one");
+    await second.sendText("two");
+
+    const finishBoth = Promise.all([first.finish(), second.finish()]).then(() => "completed");
+    await expect(
+      Promise.race([
+        finishBoth,
+        new Promise<string>((resolve) => setTimeout(() => resolve("timeout"), 2000)),
+      ]),
+    ).resolves.toBe("completed");
+    expect(chunks).toHaveLength(2);
+  });
+
+  test("rejects unsafe Pocket TTS model and voice identifiers", () => {
+    const { dir, scriptPath } = createTempScript(BASE_SCRIPT);
+    tempDirs.push(dir);
+    const baseOptions = {
+      pythonBin,
+      scriptPath,
+      voiceId: "alba",
+      modelId: "english",
+      language: "english",
+      device: "cpu",
+      quantize: false,
+      maxTokensPerChunk: 50,
+      hardCancelTimeoutMs: 500,
+      abortSignal: new AbortController().signal,
+      onAudioChunk: () => {},
+      onError: () => {},
+      log: () => {},
+    };
+
+    expect(
+      () =>
+        new PocketTtsDaemonClient({
+          ...baseOptions,
+          voiceId: "https://internal.example/voice.wav",
+        }),
+    ).toThrow(/Invalid Pocket TTS voice ID/);
+    expect(
+      () =>
+        new PocketTtsDaemonClient({
+          ...baseOptions,
+          modelId: "/tmp/pocket.yaml",
+        }),
+    ).toThrow(/Invalid Pocket TTS model ID/);
   });
 
   test("propagates daemon errors", async () => {

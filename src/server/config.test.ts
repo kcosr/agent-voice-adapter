@@ -175,13 +175,13 @@ describe("loadConfig", () => {
     });
   });
 
-  test("supports pocket_tts config path as default model id", () => {
+  test("supports pocket_tts config path without exposing it as the default model id", () => {
     const config = loadConfig({
       TTS_PROVIDER: "pocket_tts",
       POCKET_TTS_CONFIG_PATH: "/models/pocket/custom.yaml",
     });
 
-    expect(config.tts.defaultModelId).toBe("/models/pocket/custom.yaml");
+    expect(config.tts.defaultModelId).toBe("english");
     expect(config.pocketTts?.configPath).toBe("/models/pocket/custom.yaml");
   });
 

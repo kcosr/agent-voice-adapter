@@ -497,7 +497,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
       tts: {
         provider: "pocket_tts" as const,
         outputSampleRate: sampleRate,
-        defaultModelId: configPath ?? language,
+        defaultModelId: language,
         defaultVoiceId: voiceId,
       },
       pocketTts: {

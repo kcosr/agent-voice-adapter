@@ -386,7 +386,7 @@ For Kokoro, Pocket TTS, and Parakeet, setting `*_SSH_TARGET` runs the Python dae
 | `POCKET_TTS_SSH_IDENTITY_FILE` | unset | SSH key path |
 | `POCKET_TTS_LANGUAGE` | `english` | Pocket language/config name |
 | `POCKET_TTS_CONFIG_PATH` | unset | Optional custom Pocket YAML config path |
-| `POCKET_TTS_VOICE_ID` | `alba` | Pocket voice name, URL, local audio path, or safetensors path |
+| `POCKET_TTS_VOICE_ID` | `alba` | Pocket built-in voice identifier |
 | `POCKET_TTS_DEVICE` | `cpu` | PyTorch device (`cpu`, `cuda`, `cuda:0`, `mps`, or `auto`) |
 | `POCKET_TTS_QUANTIZE` | `false` | Enable Pocket dynamic int8 quantization; CPU-oriented |
 | `POCKET_TTS_MAX_TOKENS` | `50` | Max Pocket tokens per generated text chunk |
@@ -395,6 +395,8 @@ For Kokoro, Pocket TTS, and Parakeet, setting `*_SSH_TARGET` runs the Python dae
 | `POCKET_TTS_HARD_CANCEL_TIMEOUT_MS` | `5000` | Kill/restart daemon if cooperative cancel does not finish |
 
 Pocket cancellation is cooperative: the daemon accepts a `cancel` command and stops emitting audio at cancellation checkpoints. If Pocket is inside a long model operation and does not return to the daemon promptly, the Node client kills and restarts the daemon after `POCKET_TTS_HARD_CANCEL_TIMEOUT_MS`.
+
+Pocket request `model` and `voice` overrides are restricted to built-in-style identifiers containing letters, digits, `_`, or `-`. Raw voice WAV paths, voice URLs, safetensors paths, and YAML model config paths are not accepted through request fields. Use operator-controlled `POCKET_TTS_CONFIG_PATH` for a custom Pocket model config, and keep the adapter bound to localhost or behind trusted network controls.
 
 #### ASR and Listen Turns
 

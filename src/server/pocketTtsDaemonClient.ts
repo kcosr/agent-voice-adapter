@@ -60,6 +60,16 @@ interface DaemonTransportConfig {
   log: (...args: unknown[]) => void;
 }
 
+function validatePocketTtsIdentifier(value: string, fieldName: string): string {
+  const normalized = value.trim();
+  if (!/^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$/.test(normalized)) {
+    throw new Error(
+      `Invalid Pocket TTS ${fieldName}: use a built-in identifier with letters, digits, "_" or "-"`,
+    );
+  }
+  return normalized;
+}
+
 class PocketTtsDaemonProcess {
   private static instances = new Map<string, PocketTtsDaemonProcess>();
 
@@ -251,6 +261,10 @@ class PocketTtsDaemonProcess {
       await this.ensureStarted();
     } catch (error) {
       this.failActiveAndQueued(new Error(String(error)));
+      return;
+    }
+
+    if (this.inFlight || this.queue.length === 0) {
       return;
     }
 
@@ -466,8 +480,8 @@ export class PocketTtsDaemonClient {
   private activeRequestId: string | null = null;
 
   constructor(options: PocketTtsDaemonClientOptions) {
-    this.voiceId = options.voiceId;
-    this.modelId = options.modelId;
+    this.voiceId = validatePocketTtsIdentifier(options.voiceId, "voice ID");
+    this.modelId = validatePocketTtsIdentifier(options.modelId, "model ID");
     this.onAudioChunk = options.onAudioChunk;
     this.onOutputSampleRate = options.onOutputSampleRate;
     this.onError = options.onError;

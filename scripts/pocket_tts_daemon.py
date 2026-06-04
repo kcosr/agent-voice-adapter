@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import base64
 import json
+import re
 import sys
 import threading
 import traceback
@@ -10,6 +11,8 @@ from typing import Any
 import numpy as np
 import torch
 from pocket_tts import TTSModel
+
+SAFE_IDENTIFIER_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$")
 
 
 def emit(payload: dict[str, Any]) -> None:
@@ -56,6 +59,15 @@ def normalize_device(value: Any) -> str:
     if raw == "cuda" or raw.startswith("cuda:") or raw in {"cpu", "mps"}:
         return raw
     return "cpu"
+
+
+def safe_identifier(value: Any, field_name: str, default: str) -> str:
+    raw = str(value or default).strip() or default
+    if not SAFE_IDENTIFIER_RE.fullmatch(raw):
+        raise ValueError(
+            f"invalid {field_name}: use a built-in identifier with letters, digits, '_' or '-'"
+        )
+    return raw
 
 
 class ModelCache:
@@ -142,6 +154,10 @@ class DaemonState:
             if self.active is not None and self.active.request_id == request_id:
                 self.active = None
 
+    def _emit_terminal(self, request_id: str, payload: dict[str, Any]) -> None:
+        self._clear_active(request_id)
+        emit(payload)
+
     def _active_for(self, request_id: str) -> ActiveRequest | None:
         with self.lock:
             active = self.active
@@ -154,13 +170,14 @@ class DaemonState:
         try:
             self._handle_synthesize(request)
         except Exception as exc:
-            emit(
+            self._emit_terminal(
+                request_id,
                 {
                     "type": "error",
                     "request_id": request_id,
                     "error": str(exc),
                     "traceback": traceback.format_exc(limit=3),
-                }
+                },
             )
         finally:
             self._clear_active(request_id)
@@ -173,17 +190,15 @@ class DaemonState:
 
         text = str(request.get("text", "")).strip()
         if not text:
-            emit({"type": "done", "request_id": request_id})
+            self._emit_terminal(request_id, {"type": "done", "request_id": request_id})
             return
 
-        voice = str(request.get("voice", "alba")).strip() or "alba"
+        voice = safe_identifier(request.get("voice", "alba"), "voice", "alba")
         model_value = str(request.get("model", "")).strip()
-        language = str(request.get("language", "english")).strip() or "english"
+        language = safe_identifier(request.get("language", "english"), "language", "english")
         config_path = str(request.get("config_path", "") or "").strip() or None
-        if model_value.endswith((".yaml", ".yml")) and config_path is None:
-            config_path = model_value
-        elif model_value and not config_path:
-            language = model_value
+        if model_value and not config_path:
+            language = safe_identifier(model_value, "model", language)
 
         if config_path:
             language_for_load = None
@@ -198,21 +213,28 @@ class DaemonState:
         frames_after_eos = optional_int(request.get("frames_after_eos"))
 
         if active.cancel_event.is_set():
-            emit({"type": "canceled", "request_id": request_id})
+            self._emit_terminal(request_id, {"type": "canceled", "request_id": request_id})
             return
 
-        model = self.cache.get_model(
-            language=language_for_load,
-            config_path=config_for_load,
-            device=device,
-            quantize=quantize,
-        )
+        try:
+            model = self.cache.get_model(
+                language=language_for_load,
+                config_path=config_for_load,
+                device=device,
+                quantize=quantize,
+            )
+        except Exception as exc:
+            target = config_for_load if config_for_load is not None else language_for_load
+            raise RuntimeError(f"failed to load Pocket TTS model/config {target!r}: {exc}") from exc
 
         if active.cancel_event.is_set():
-            emit({"type": "canceled", "request_id": request_id})
+            self._emit_terminal(request_id, {"type": "canceled", "request_id": request_id})
             return
 
-        voice_state = self.cache.get_voice_state(model, voice)
+        try:
+            voice_state = self.cache.get_voice_state(model, voice)
+        except Exception as exc:
+            raise RuntimeError(f"failed to load Pocket TTS voice {voice!r}: {exc}") from exc
 
         emit(
             {
@@ -238,7 +260,7 @@ class DaemonState:
             copy_state=True,
         ):
             if active.cancel_event.is_set():
-                emit({"type": "canceled", "request_id": request_id})
+                self._emit_terminal(request_id, {"type": "canceled", "request_id": request_id})
                 return
 
             payload = as_pcm16le_bytes(chunk)
@@ -253,10 +275,10 @@ class DaemonState:
             )
 
         if active.cancel_event.is_set():
-            emit({"type": "canceled", "request_id": request_id})
+            self._emit_terminal(request_id, {"type": "canceled", "request_id": request_id})
             return
 
-        emit({"type": "done", "request_id": request_id})
+        self._emit_terminal(request_id, {"type": "done", "request_id": request_id})
 
 
 def main() -> int:

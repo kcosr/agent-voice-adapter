@@ -44,6 +44,8 @@ Do not enable quantization for a CUDA device. For GPU experiments, install a CUD
 
 The default language is `english` and the default voice is `alba`. Pocket downloads model weights, tokenizer files, and predefined voice state files from Hugging Face on first use and caches them under `$HF_HOME` (default `~/.cache/huggingface`). Some voice-cloning paths may require accepting the model terms on Hugging Face and authenticating the host.
 
+The adapter currently exposes Pocket voices as built-in voice identifiers only. Do not put a WAV path, URL, `hf://` URL, or safetensors path in `voiceId`; those custom voice forms need an explicit named-voice mapping before they are safe to expose through the adapter. Use `configPath` only for operator-controlled Pocket YAML model configs.
+
 ### Config wiring
 
 Point `pocketTts.pythonBin` at `<venv>/bin/python`, `pocketTts.scriptPath` at `scripts/pocket_tts_daemon.py`, and set `"tts": { "provider": "pocket_tts" }`.
