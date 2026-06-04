@@ -114,6 +114,7 @@ class PocketTtsDaemonProcess {
   private inFlight: DaemonRequest | null = null;
   private ready = false;
   private inFlightCompleted = false;
+  private restartQueuedAfterClose = false;
 
   private constructor(config: DaemonTransportConfig) {
     this.config = config;
@@ -165,7 +166,7 @@ class PocketTtsDaemonProcess {
           requestId,
           hardCancelTimeoutMs: this.config.hardCancelTimeoutMs,
         });
-        this.shutdown(new Error("Pocket TTS daemon killed after cancel timeout"));
+        this.restartAfterHardCancel(new Error("Pocket TTS daemon killed after cancel timeout"));
       }, this.config.hardCancelTimeoutMs);
     }
   }
@@ -214,6 +215,11 @@ class PocketTtsDaemonProcess {
         this.ready = false;
         this.stdoutReader?.removeAllListeners();
         this.stdoutReader = null;
+        if (this.restartQueuedAfterClose) {
+          this.restartQueuedAfterClose = false;
+          void this.pumpQueue();
+          return;
+        }
         this.failActiveAndQueued(
           new Error(
             `Pocket TTS daemon exited unexpectedly (code=${code ?? "null"}, signal=${signal ?? "none"})`,
@@ -350,6 +356,9 @@ class PocketTtsDaemonProcess {
     }
 
     if (parsed.type === "started") {
+      if (this.inFlight.cancelRequested) {
+        return;
+      }
       if (
         typeof parsed.sample_rate === "number" &&
         Number.isFinite(parsed.sample_rate) &&
@@ -434,18 +443,44 @@ class PocketTtsDaemonProcess {
     void this.pumpQueue();
   }
 
-  private failActiveAndQueued(error: Error): void {
-    if (this.inFlight && !this.inFlightCompleted) {
-      this.clearCancelTimer(this.inFlight);
-      this.inFlightCompleted = true;
-      this.inFlight.reject(error);
-      this.inFlight = null;
+  private rejectInFlight(error: Error): void {
+    if (!this.inFlight || this.inFlightCompleted) {
+      return;
     }
 
+    this.clearCancelTimer(this.inFlight);
+    this.inFlightCompleted = true;
+    this.inFlight.reject(error);
+    this.inFlight = null;
+  }
+
+  private failActiveAndQueued(error: Error): void {
+    this.rejectInFlight(error);
     while (this.queue.length > 0) {
       const queued = this.queue.shift();
       queued?.reject(error);
     }
+  }
+
+  private restartAfterHardCancel(error: Error): void {
+    this.rejectInFlight(error);
+
+    const child = this.child;
+    this.child = null;
+    this.ready = false;
+    this.inFlightCompleted = false;
+    this.startPromise = null;
+
+    this.stdoutReader?.removeAllListeners();
+    this.stdoutReader = null;
+
+    if (child) {
+      this.restartQueuedAfterClose = true;
+      child.kill("SIGKILL");
+      return;
+    }
+
+    void this.pumpQueue();
   }
 
   private shutdown(error: Error): void {
@@ -456,6 +491,7 @@ class PocketTtsDaemonProcess {
     this.ready = false;
     this.inFlight = null;
     this.inFlightCompleted = false;
+    this.restartQueuedAfterClose = false;
     this.queue = [];
 
     this.stdoutReader?.removeAllListeners();

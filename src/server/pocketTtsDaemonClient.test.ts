@@ -121,6 +121,45 @@ for line in sys.stdin:
         pass
 `;
 
+const HANGING_FIRST_REQUEST_SCRIPT = `
+import base64
+import json
+import sys
+import threading
+import time
+
+def emit(payload):
+    sys.stdout.write(json.dumps(payload, separators=(",", ":")) + "\\n")
+    sys.stdout.flush()
+
+def synth(message):
+    request_id = message["request_id"]
+    emit({"type": "started", "request_id": request_id, "sample_rate": 16000})
+    if message.get("text") == "hang":
+        while True:
+            emit({
+                "type": "audio",
+                "request_id": request_id,
+                "chunk_base64": base64.b64encode(b"hanging").decode("ascii"),
+            })
+            time.sleep(0.02)
+
+    emit({
+        "type": "audio",
+        "request_id": request_id,
+        "chunk_base64": base64.b64encode(b"resumed").decode("ascii"),
+    })
+    emit({"type": "done", "request_id": request_id})
+
+emit({"type": "ready"})
+for line in sys.stdin:
+    message = json.loads(line)
+    if message.get("type") == "synthesize":
+        threading.Thread(target=synth, args=(message,), daemon=True).start()
+    elif message.get("type") == "cancel":
+        pass
+`;
+
 const SLOW_READY_SCRIPT = `
 import base64
 import json
@@ -381,5 +420,55 @@ describe.skipIf(!PYTHON_BIN)("PocketTtsDaemonClient", () => {
     expect(logs.some(([message]) => message === "Pocket TTS daemon hard cancel timeout")).toBe(
       true,
     );
+  });
+
+  test("preserves queued requests when hard cancel restarts the daemon", async () => {
+    const { dir, scriptPath } = createTempScript(HANGING_FIRST_REQUEST_SCRIPT);
+    tempDirs.push(dir);
+    const firstController = new AbortController();
+    const firstChunks: Buffer[] = [];
+    const secondChunks: Buffer[] = [];
+    const createClient = (options: {
+      abortSignal: AbortSignal;
+      onAudioChunk: (pcmBytes: Uint8Array) => void;
+    }) =>
+      new PocketTtsDaemonClient({
+        pythonBin,
+        scriptPath,
+        voiceId: "alba",
+        modelId: "english",
+        language: "english",
+        device: "cpu",
+        quantize: false,
+        maxTokensPerChunk: 50,
+        hardCancelTimeoutMs: 50,
+        abortSignal: options.abortSignal,
+        onAudioChunk: options.onAudioChunk,
+        onError: () => {},
+        log: () => {},
+      });
+    const first = createClient({
+      abortSignal: firstController.signal,
+      onAudioChunk: (pcmBytes) => {
+        firstChunks.push(Buffer.from(pcmBytes));
+        if (firstChunks.length === 1) {
+          firstController.abort("test_hard_cancel");
+        }
+      },
+    });
+    const second = createClient({
+      abortSignal: new AbortController().signal,
+      onAudioChunk: (pcmBytes) => secondChunks.push(Buffer.from(pcmBytes)),
+    });
+
+    await first.sendText("hang");
+    const firstFinish = first.finish();
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    await second.sendText("after hard cancel");
+    const secondFinish = second.finish();
+
+    await expect(firstFinish).rejects.toThrow(/cancel timeout/);
+    await expect(secondFinish).resolves.toBeUndefined();
+    expect(secondChunks.map((chunk) => chunk.toString("utf8"))).toEqual(["resumed"]);
   });
 });
