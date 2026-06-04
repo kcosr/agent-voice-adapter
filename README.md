@@ -39,7 +39,7 @@ graph TB
     subgraph Server["Node.js Voice Server"]
         API["HTTP API<br/>/api/turn"]
         Queue["FIFO Queue<br/>(one job at a time)"]
-        TTS["TTS Provider<br/>ElevenLabs · Kokoro"]
+        TTS["TTS Provider<br/>ElevenLabs · Kokoro · Pocket TTS"]
         ASR["ASR Provider<br/>Parakeet (optional)"]
         WS["WebSocket Server"]
     end
@@ -51,6 +51,7 @@ graph TB
 
     subgraph Backend["Python Model Backend"]
         Kokoro["Kokoro TTS Daemon"]
+        Pocket["Pocket TTS Daemon"]
         Parakeet["Parakeet ASR Daemon"]
     end
 
@@ -58,6 +59,7 @@ graph TB
     API --> Queue
     Queue --> TTS
     TTS --> Kokoro
+    TTS --> Pocket
     TTS -->|"PCM chunks"| WS
     WS -->|"turn_audio_chunk"| Web
     WS -->|"turn_audio_chunk"| Android
@@ -95,7 +97,7 @@ The server exposes two complementary API families:
   - **ElevenLabs** for TTS
   - **OpenAI** for ASR (Whisper / `gpt-4o-mini-transcribe`)
 
-If you prefer self-hosted inference instead of hosted APIs, see [Local Python Models](#local-python-models-alternative) below.
+If you prefer self-hosted inference instead of hosted APIs, use Kokoro or Pocket TTS and see [Local Python Models](#local-python-models-alternative) below.
 
 ### Setup (recommended: hosted ElevenLabs TTS + OpenAI Whisper ASR)
 
@@ -222,7 +224,7 @@ export ELEVENLABS_TTS_VOICE_ID=VUGQSU6BSEjkbudnJbOj
 export ASR_PROVIDER=none
 ```
 
-**Local Kokoro TTS + Parakeet ASR (requires local GPU/Python stack):**
+**Local Kokoro TTS + Parakeet ASR:**
 ```bash
 export TTS_PROVIDER=kokoro_local
 export ASR_PROVIDER=parakeet_local
@@ -230,6 +232,17 @@ export KOKORO_LOCAL_PYTHON_BIN=python3
 export KOKORO_LOCAL_SCRIPT_PATH=scripts/kokoro_daemon.py
 export PARAKEET_LOCAL_PYTHON_BIN=python3
 export PARAKEET_LOCAL_SCRIPT_PATH=scripts/parakeet_daemon.py
+```
+
+**SSH-backed Pocket TTS CPU provider:**
+```bash
+export TTS_PROVIDER=pocket_tts
+export POCKET_TTS_PYTHON_BIN=/home/kevin/.venvs/pocket-tts/bin/python
+export POCKET_TTS_SCRIPT_PATH=~/agent-voice-adapter/scripts/pocket_tts_daemon.py
+export POCKET_TTS_SSH_TARGET=pc
+export POCKET_TTS_LANGUAGE=english
+export POCKET_TTS_VOICE_ID=alba
+export POCKET_TTS_DEVICE=cpu
 ```
 
 ### JSON Config File
@@ -244,7 +257,7 @@ If `AGENT_VOICE_ADAPTER_CONFIG_FILE` is not set, the server automatically tries 
 
 For production you typically keep your live config outside the repo (or in a separate deploy checkout) and point `AGENT_VOICE_ADAPTER_CONFIG_FILE` at it. When rsyncing a dev worktree onto a deploy checkout, pass `--exclude 'agent-voice-adapter.json'` so your live config is never overwritten. You can also keep the API keys out of the JSON entirely and inject them via environment variables (or a systemd drop-in containing `Environment="ELEVENLABS_API_KEY=…"` / `Environment="OPENAI_API_KEY=…"`) — env vars take precedence over JSON config.
 
-If you prefer local GPU inference instead of hosted providers, set `"tts": { "provider": "kokoro_local" }` and `"asr": { "provider": "parakeet_local" }` with the corresponding `kokoroLocal` / `parakeetLocal` blocks (see the inline example below), then follow [docs/python-local-models-setup.md](docs/python-local-models-setup.md) for venv, package, and model setup steps.
+If you prefer local or SSH inference instead of hosted providers, set `"tts": { "provider": "kokoro_local" }` or `"tts": { "provider": "pocket_tts" }` and `"asr": { "provider": "parakeet_local" }` with the corresponding provider blocks (see the inline example below), then follow [docs/python-local-models-setup.md](docs/python-local-models-setup.md) for venv, package, and model setup steps.
 
 Full inline example (covers local, SSH, and OpenAI-hosted variants):
 
@@ -263,6 +276,18 @@ Full inline example (covers local, SSH, and OpenAI-hosted variants):
     "device": "auto",
     "speed": 1.0,
     "ssh": { "target": "user@gpu-host", "port": 22 }
+  },
+  "pocketTts": {
+    "pythonBin": "/home/kevin/.venvs/pocket-tts/bin/python",
+    "scriptPath": "~/agent-voice-adapter/scripts/pocket_tts_daemon.py",
+    "language": "english",
+    "voiceId": "alba",
+    "device": "cpu",
+    "quantize": false,
+    "maxTokensPerChunk": 50,
+    "sampleRate": 24000,
+    "hardCancelTimeoutMs": 5000,
+    "ssh": { "target": "pc" }
   },
   "asr": {
     "provider": "parakeet_local",
@@ -308,7 +333,7 @@ A subset of defaults can be changed at runtime via `GET/PATCH /api/server-settin
 
 ### SSH-Backed Daemon Execution
 
-For Kokoro and Parakeet, setting `*_SSH_TARGET` runs the Python daemon remotely over SSH. `*_PYTHON_BIN` and `*_SCRIPT_PATH` are evaluated on the remote host.
+For Kokoro, Pocket TTS, and Parakeet, setting `*_SSH_TARGET` runs the Python daemon remotely over SSH. `*_PYTHON_BIN` and `*_SCRIPT_PATH` are evaluated on the remote host.
 
 ### Environment Variable Reference
 
@@ -320,7 +345,7 @@ For Kokoro and Parakeet, setting `*_SSH_TARGET` runs the Python daemon remotely 
 | `LISTEN_HOST` | unset | Bind host (e.g., `127.0.0.1`) |
 | `AGENT_VOICE_ADAPTER_CONFIG_FILE` | unset | JSON config path |
 | `HTTP_JSON_BODY_LIMIT` | `1mb` | JSON request body limit |
-| `TTS_PROVIDER` | `elevenlabs` | `elevenlabs` or `kokoro_local` |
+| `TTS_PROVIDER` | `elevenlabs` | `elevenlabs`, `kokoro_local`, or `pocket_tts` |
 
 #### ElevenLabs
 
@@ -349,6 +374,27 @@ For Kokoro and Parakeet, setting `*_SSH_TARGET` runs the Python daemon remotely 
 | `KOKORO_LOCAL_MAX_CHARS` | `850` | Max text chars per chunk |
 | `KOKORO_LOCAL_GAP_MS` | `0` | Inter-chunk pause |
 | `KOKORO_LOCAL_SAMPLE_RATE` | `24000` | PCM sample rate |
+
+#### Pocket TTS
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `POCKET_TTS_PYTHON_BIN` | `python3` | Python executable |
+| `POCKET_TTS_SCRIPT_PATH` | `scripts/pocket_tts_daemon.py` | Daemon script |
+| `POCKET_TTS_SSH_TARGET` | unset | Remote host (e.g., `pc`) |
+| `POCKET_TTS_SSH_PORT` | unset | SSH port |
+| `POCKET_TTS_SSH_IDENTITY_FILE` | unset | SSH key path |
+| `POCKET_TTS_LANGUAGE` | `english` | Pocket language/config name |
+| `POCKET_TTS_CONFIG_PATH` | unset | Optional custom Pocket YAML config path |
+| `POCKET_TTS_VOICE_ID` | `alba` | Pocket voice name, URL, local audio path, or safetensors path |
+| `POCKET_TTS_DEVICE` | `cpu` | PyTorch device (`cpu`, `cuda`, `cuda:0`, `mps`, or `auto`) |
+| `POCKET_TTS_QUANTIZE` | `false` | Enable Pocket dynamic int8 quantization; CPU-oriented |
+| `POCKET_TTS_MAX_TOKENS` | `50` | Max Pocket tokens per generated text chunk |
+| `POCKET_TTS_FRAMES_AFTER_EOS` | unset | Optional Pocket EOS tail frames |
+| `POCKET_TTS_SAMPLE_RATE` | `24000` | Expected PCM sample rate |
+| `POCKET_TTS_HARD_CANCEL_TIMEOUT_MS` | `5000` | Kill/restart daemon if cooperative cancel does not finish |
+
+Pocket cancellation is cooperative: the daemon accepts a `cancel` command and stops emitting audio at cancellation checkpoints. If Pocket is inside a long model operation and does not return to the daemon promptly, the Node client kills and restarts the daemon after `POCKET_TTS_HARD_CANCEL_TIMEOUT_MS`.
 
 #### ASR and Listen Turns
 

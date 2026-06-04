@@ -12,7 +12,7 @@ export interface SanitizerConfig {
   maxTextChars: number;
 }
 
-export type TtsProvider = "elevenlabs" | "kokoro_local";
+export type TtsProvider = "elevenlabs" | "kokoro_local" | "pocket_tts";
 export type AsrProvider = "none" | "parakeet_local" | "openai";
 
 export interface ElevenLabsConfig {
@@ -41,6 +41,21 @@ export interface KokoroLocalConfig {
   maxTextCharsPerChunk: number;
   gapMsBetweenChunks: number;
   sampleRate: number;
+}
+
+export interface PocketTtsConfig {
+  pythonBin: string;
+  scriptPath: string;
+  ssh?: SshConfig;
+  voiceId: string;
+  language: string;
+  configPath?: string;
+  device: string;
+  quantize: boolean;
+  maxTokensPerChunk: number;
+  framesAfterEos?: number;
+  sampleRate: number;
+  hardCancelTimeoutMs: number;
 }
 
 export interface ParakeetLocalConfig {
@@ -91,6 +106,7 @@ export interface AppConfig {
   };
   elevenLabs?: ElevenLabsConfig;
   kokoroLocal?: KokoroLocalConfig;
+  pocketTts?: PocketTtsConfig;
   asr: {
     provider: AsrProvider;
     defaultModelId: string | null;
@@ -165,6 +181,10 @@ function parseTtsProvider(value: string | undefined): TtsProvider {
 
   if (normalized === "kokoro_local") {
     return "kokoro_local";
+  }
+
+  if (normalized === "pocket_tts") {
+    return "pocket_tts";
   }
 
   return "elevenlabs";
@@ -258,6 +278,8 @@ const DEFAULT_ELEVENLABS_TTS_VOICE_ID = "VUGQSU6BSEjkbudnJbOj";
 const DEFAULT_KOKORO_MODEL_ID = "hexgrad/Kokoro-82M";
 const DEFAULT_KOKORO_VOICE_ID = "af_heart";
 const DEFAULT_KOKORO_LANG_CODE = "a";
+const DEFAULT_POCKET_TTS_LANGUAGE = "english";
+const DEFAULT_POCKET_TTS_VOICE_ID = "alba";
 const DEFAULT_PARAKEET_MODEL_ID = "nvidia/parakeet-ctc-0.6b";
 const DEFAULT_OPENAI_ASR_MODEL_ID = "gpt-4o-mini-transcribe";
 const DEFAULT_OPENAI_ASR_BASE_URL = "https://api.openai.com";
@@ -283,8 +305,10 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
   const asrProvider = parseAsrProvider(env.ASR_PROVIDER);
   const listenHost = env.LISTEN_HOST?.trim() || undefined;
   const defaultKokoroScriptPath = path.resolve(__dirname, "../../scripts/kokoro_daemon.py");
+  const defaultPocketTtsScriptPath = path.resolve(__dirname, "../../scripts/pocket_tts_daemon.py");
   const defaultParakeetScriptPath = path.resolve(__dirname, "../../scripts/parakeet_daemon.py");
   const kokoroSsh = loadSshConfig(env, "KOKORO_LOCAL");
+  const pocketTtsSsh = loadSshConfig(env, "POCKET_TTS");
   const parakeetSsh = loadSshConfig(env, "PARAKEET_LOCAL");
   const recognitionCompletionTimeoutMs = parsePositiveInt(
     env.ASR_RECOGNITION_COMPLETION_TIMEOUT_MS ?? env.ASR_RECOGNITION_TIMEOUT_MS,
@@ -453,6 +477,44 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
         maxTextCharsPerChunk: parsePositiveInt(env.KOKORO_LOCAL_MAX_CHARS, 850),
         gapMsBetweenChunks: parseNonNegativeInt(env.KOKORO_LOCAL_GAP_MS, 0),
         sampleRate,
+      },
+    };
+  }
+
+  if (provider === "pocket_tts") {
+    const language =
+      (env.POCKET_TTS_LANGUAGE ?? DEFAULT_POCKET_TTS_LANGUAGE).trim() ||
+      DEFAULT_POCKET_TTS_LANGUAGE;
+    const voiceId =
+      (env.POCKET_TTS_VOICE_ID ?? DEFAULT_POCKET_TTS_VOICE_ID).trim() ||
+      DEFAULT_POCKET_TTS_VOICE_ID;
+    const sampleRate = parsePositiveInt(env.POCKET_TTS_SAMPLE_RATE, 24000);
+    const configPath = parseOptionalString(env.POCKET_TTS_CONFIG_PATH);
+    const framesAfterEos = parseOptionalPositiveInt(env.POCKET_TTS_FRAMES_AFTER_EOS);
+
+    return {
+      ...shared,
+      tts: {
+        provider: "pocket_tts" as const,
+        outputSampleRate: sampleRate,
+        defaultModelId: configPath ?? language,
+        defaultVoiceId: voiceId,
+      },
+      pocketTts: {
+        pythonBin: (env.POCKET_TTS_PYTHON_BIN ?? "python3").trim() || "python3",
+        scriptPath:
+          (env.POCKET_TTS_SCRIPT_PATH ?? defaultPocketTtsScriptPath).trim() ||
+          defaultPocketTtsScriptPath,
+        ...(pocketTtsSsh ? { ssh: pocketTtsSsh } : {}),
+        voiceId,
+        language,
+        ...(configPath ? { configPath } : {}),
+        device: (env.POCKET_TTS_DEVICE ?? "cpu").trim() || "cpu",
+        quantize: parseBoolean(env.POCKET_TTS_QUANTIZE, false),
+        maxTokensPerChunk: parsePositiveInt(env.POCKET_TTS_MAX_TOKENS, 50),
+        ...(framesAfterEos ? { framesAfterEos } : {}),
+        sampleRate,
+        hardCancelTimeoutMs: parsePositiveInt(env.POCKET_TTS_HARD_CANCEL_TIMEOUT_MS, 5000),
       },
     };
   }

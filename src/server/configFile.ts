@@ -154,6 +154,76 @@ export function loadFileConfigEnv(env: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
     "KOKORO_LOCAL_SAMPLE_RATE",
     readNestedConfigValue(parsed, ["kokoroLocal", "sampleRate"]),
   );
+  setFileEnvValue(
+    fileEnv,
+    "POCKET_TTS_PYTHON_BIN",
+    readNestedConfigValue(parsed, ["pocketTts", "pythonBin"]),
+  );
+  setFileEnvValue(
+    fileEnv,
+    "POCKET_TTS_SCRIPT_PATH",
+    readNestedConfigValue(parsed, ["pocketTts", "scriptPath"]),
+  );
+  setFileEnvValue(
+    fileEnv,
+    "POCKET_TTS_SSH_TARGET",
+    readNestedConfigValue(parsed, ["pocketTts", "ssh", "target"]),
+  );
+  setFileEnvValue(
+    fileEnv,
+    "POCKET_TTS_SSH_PORT",
+    readNestedConfigValue(parsed, ["pocketTts", "ssh", "port"]),
+  );
+  setFileEnvValue(
+    fileEnv,
+    "POCKET_TTS_SSH_IDENTITY_FILE",
+    readNestedConfigValue(parsed, ["pocketTts", "ssh", "identityFile"]),
+  );
+  setFileEnvValue(
+    fileEnv,
+    "POCKET_TTS_LANGUAGE",
+    readNestedConfigValue(parsed, ["pocketTts", "language"]),
+  );
+  setFileEnvValue(
+    fileEnv,
+    "POCKET_TTS_CONFIG_PATH",
+    readNestedConfigValue(parsed, ["pocketTts", "configPath"]),
+  );
+  setFileEnvValue(
+    fileEnv,
+    "POCKET_TTS_VOICE_ID",
+    readNestedConfigValue(parsed, ["pocketTts", "voiceId"]),
+  );
+  setFileEnvValue(
+    fileEnv,
+    "POCKET_TTS_DEVICE",
+    readNestedConfigValue(parsed, ["pocketTts", "device"]),
+  );
+  setFileEnvValue(
+    fileEnv,
+    "POCKET_TTS_QUANTIZE",
+    readNestedConfigValue(parsed, ["pocketTts", "quantize"]),
+  );
+  setFileEnvValue(
+    fileEnv,
+    "POCKET_TTS_MAX_TOKENS",
+    readNestedConfigValue(parsed, ["pocketTts", "maxTokensPerChunk"]),
+  );
+  setFileEnvValue(
+    fileEnv,
+    "POCKET_TTS_FRAMES_AFTER_EOS",
+    readNestedConfigValue(parsed, ["pocketTts", "framesAfterEos"]),
+  );
+  setFileEnvValue(
+    fileEnv,
+    "POCKET_TTS_SAMPLE_RATE",
+    readNestedConfigValue(parsed, ["pocketTts", "sampleRate"]),
+  );
+  setFileEnvValue(
+    fileEnv,
+    "POCKET_TTS_HARD_CANCEL_TIMEOUT_MS",
+    readNestedConfigValue(parsed, ["pocketTts", "hardCancelTimeoutMs"]),
+  );
   setFileEnvValue(fileEnv, "ASR_PROVIDER", readNestedConfigValue(parsed, ["asr", "provider"]));
   setFileEnvValue(
     fileEnv,
