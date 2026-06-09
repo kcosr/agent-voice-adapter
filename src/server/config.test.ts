@@ -105,6 +105,86 @@ describe("loadConfig", () => {
     });
   });
 
+  test("supports pocket_tts provider without ELEVENLABS_API_KEY", () => {
+    const config = loadConfig({
+      TTS_PROVIDER: "pocket_tts",
+      POCKET_TTS_PYTHON_BIN: "/tmp/pocket/bin/python",
+      POCKET_TTS_SCRIPT_PATH: "/tmp/pocket_tts_daemon.py",
+      POCKET_TTS_LANGUAGE: "english",
+      POCKET_TTS_VOICE_ID: "alba",
+      POCKET_TTS_DEVICE: "cpu",
+      POCKET_TTS_QUANTIZE: "true",
+      POCKET_TTS_MAX_TOKENS: "64",
+      POCKET_TTS_FRAMES_AFTER_EOS: "2",
+      POCKET_TTS_SAMPLE_RATE: "24000",
+      POCKET_TTS_HARD_CANCEL_TIMEOUT_MS: "1500",
+    });
+
+    expect(config.tts.provider).toBe("pocket_tts");
+    expect(config.tts.defaultModelId).toBe("english");
+    expect(config.tts.defaultVoiceId).toBe("alba");
+    expect(config.tts.outputSampleRate).toBe(24000);
+    expect(config.elevenLabs).toBeUndefined();
+    expect(config.pocketTts).toMatchObject({
+      pythonBin: "/tmp/pocket/bin/python",
+      scriptPath: "/tmp/pocket_tts_daemon.py",
+      language: "english",
+      voiceId: "alba",
+      device: "cpu",
+      quantize: true,
+      maxTokensPerChunk: 64,
+      framesAfterEos: 2,
+      sampleRate: 24000,
+      hardCancelTimeoutMs: 1500,
+    });
+  });
+
+  test("defaults pocket_tts provider to CPU-oriented settings", () => {
+    const config = loadConfig({
+      TTS_PROVIDER: "pocket_tts",
+    });
+
+    expect(config.tts.provider).toBe("pocket_tts");
+    expect(config.tts.defaultModelId).toBe("english");
+    expect(config.tts.defaultVoiceId).toBe("alba");
+    expect(config.pocketTts).toMatchObject({
+      pythonBin: "python3",
+      language: "english",
+      voiceId: "alba",
+      device: "cpu",
+      quantize: false,
+      maxTokensPerChunk: 50,
+      sampleRate: 24000,
+      hardCancelTimeoutMs: 5000,
+    });
+    expect(config.pocketTts?.scriptPath).toContain("scripts/pocket_tts_daemon.py");
+  });
+
+  test("supports ssh config for pocket_tts daemon", () => {
+    const config = loadConfig({
+      TTS_PROVIDER: "pocket_tts",
+      POCKET_TTS_SSH_TARGET: "voice-cpu",
+      POCKET_TTS_SSH_PORT: "2223",
+      POCKET_TTS_SSH_IDENTITY_FILE: "/home/test/.ssh/pocket",
+    });
+
+    expect(config.pocketTts?.ssh).toEqual({
+      target: "voice-cpu",
+      port: 2223,
+      identityFile: "/home/test/.ssh/pocket",
+    });
+  });
+
+  test("supports pocket_tts config path without exposing it as the default model id", () => {
+    const config = loadConfig({
+      TTS_PROVIDER: "pocket_tts",
+      POCKET_TTS_CONFIG_PATH: "/models/pocket/custom.yaml",
+    });
+
+    expect(config.tts.defaultModelId).toBe("english");
+    expect(config.pocketTts?.configPath).toBe("/models/pocket/custom.yaml");
+  });
+
   test("invalid TTS_PROVIDER falls back to elevenlabs", () => {
     const config = loadConfig({
       ELEVENLABS_API_KEY: "test-key",
@@ -332,6 +412,57 @@ describe("loadConfig", () => {
     expect(config.wakeIntent).toEqual({
       allowRemote: true,
       sharedSecret: "from-file",
+    });
+  });
+
+  test("loads pocketTts structured JSON config from AGENT_VOICE_ADAPTER_CONFIG_FILE", () => {
+    const tempDir = mkdtempSync(path.join(os.tmpdir(), "voice-config-"));
+    tempDirs.push(tempDir);
+    const configFilePath = path.join(tempDir, "config.json");
+    writeFileSync(
+      configFilePath,
+      JSON.stringify(
+        {
+          tts: {
+            provider: "pocket_tts",
+          },
+          pocketTts: {
+            pythonBin: "/home/kevin/.venvs/pocket-tts/bin/python",
+            scriptPath: "~/agent-voice-adapter/scripts/pocket_tts_daemon.py",
+            ssh: { target: "pc" },
+            language: "english",
+            voiceId: "alba",
+            device: "cpu",
+            quantize: true,
+            maxTokensPerChunk: 55,
+            framesAfterEos: 3,
+            sampleRate: 24000,
+            hardCancelTimeoutMs: 2000,
+          },
+        },
+        null,
+        2,
+      ),
+      "utf8",
+    );
+
+    const config = loadConfig({
+      AGENT_VOICE_ADAPTER_CONFIG_FILE: configFilePath,
+    });
+
+    expect(config.tts.provider).toBe("pocket_tts");
+    expect(config.pocketTts).toMatchObject({
+      pythonBin: "/home/kevin/.venvs/pocket-tts/bin/python",
+      scriptPath: "~/agent-voice-adapter/scripts/pocket_tts_daemon.py",
+      ssh: { target: "pc" },
+      language: "english",
+      voiceId: "alba",
+      device: "cpu",
+      quantize: true,
+      maxTokensPerChunk: 55,
+      framesAfterEos: 3,
+      sampleRate: 24000,
+      hardCancelTimeoutMs: 2000,
     });
   });
 

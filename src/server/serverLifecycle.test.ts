@@ -4,6 +4,7 @@ import { describe, expect, test, vi } from "vitest";
 
 const shutdownKokoroSpy = vi.hoisted(() => vi.fn());
 const shutdownParakeetSpy = vi.hoisted(() => vi.fn());
+const shutdownPocketTtsSpy = vi.hoisted(() => vi.fn());
 
 vi.mock("./kokoroLocalDaemonClient", async () => {
   const actual = await vi.importActual<typeof import("./kokoroLocalDaemonClient")>(
@@ -22,6 +23,15 @@ vi.mock("./parakeetLocalDaemonClient", async () => {
   return {
     ...actual,
     shutdownParakeetDaemonProcesses: shutdownParakeetSpy,
+  };
+});
+
+vi.mock("./pocketTtsDaemonClient", async () => {
+  const actual =
+    await vi.importActual<typeof import("./pocketTtsDaemonClient")>("./pocketTtsDaemonClient");
+  return {
+    ...actual,
+    shutdownPocketTtsDaemonProcesses: shutdownPocketTtsSpy,
   };
 });
 
@@ -90,6 +100,7 @@ describe("server lifecycle", () => {
     async () => {
       shutdownKokoroSpy.mockClear();
       shutdownParakeetSpy.mockClear();
+      shutdownPocketTtsSpy.mockClear();
 
       const server = await startServer(TEST_CONFIG);
       await new Promise<void>((resolve, reject) => {
@@ -104,6 +115,7 @@ describe("server lifecycle", () => {
 
       expect(shutdownKokoroSpy).toHaveBeenCalledTimes(1);
       expect(shutdownParakeetSpy).toHaveBeenCalledTimes(1);
+      expect(shutdownPocketTtsSpy).toHaveBeenCalledTimes(1);
     },
   );
 });

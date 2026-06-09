@@ -23,6 +23,7 @@ import {
   formatLinkedSessionPrefixLabel,
 } from "./linkedSessionTtsPrefix";
 import { shutdownParakeetDaemonProcesses } from "./parakeetLocalDaemonClient";
+import { shutdownPocketTtsDaemonProcesses } from "./pocketTtsDaemonClient";
 import { dequeueNext, removeByRequestId } from "./queueUtils";
 import { sanitizeTtsText } from "./sanitizeText";
 import { createSessionDispatchService } from "./sessionDispatch";
@@ -905,6 +906,7 @@ export async function startServer(config: AppConfig): Promise<http.Server> {
     activeDirectSttByRequestId.clear();
     shutdownKokoroDaemonProcesses();
     shutdownParakeetDaemonProcesses();
+    shutdownPocketTtsDaemonProcesses();
   });
 
   const outputSampleRate = config.tts.outputSampleRate;

@@ -3,6 +3,7 @@ import { describe, expect, test } from "vitest";
 import type { AppConfig } from "./config";
 import { ElevenLabsStreamingClient } from "./elevenLabsStreamingClient";
 import { KokoroLocalDaemonClient } from "./kokoroLocalDaemonClient";
+import { PocketTtsDaemonClient } from "./pocketTtsDaemonClient";
 import { createStreamingTtsClient } from "./ttsProvider";
 
 const BASE_OPTIONS = {
@@ -100,5 +101,50 @@ describe("createStreamingTtsClient", () => {
 
     const client = createStreamingTtsClient(config, BASE_OPTIONS);
     expect(client).toBeInstanceOf(KokoroLocalDaemonClient);
+  });
+
+  test("creates pocket_tts daemon provider when configured", () => {
+    const config: AppConfig = {
+      port: 4300,
+      wsPath: "/ws",
+      tts: {
+        provider: "pocket_tts",
+        outputSampleRate: 24000,
+        defaultModelId: "english",
+        defaultVoiceId: "alba",
+      },
+      pocketTts: {
+        pythonBin: "python3",
+        scriptPath: "scripts/pocket_tts_daemon.py",
+        voiceId: "alba",
+        language: "english",
+        device: "cpu",
+        quantize: false,
+        maxTokensPerChunk: 50,
+        sampleRate: 24000,
+        hardCancelTimeoutMs: 5000,
+      },
+      asr: {
+        provider: "none",
+        defaultModelId: null,
+        recognitionStartTimeoutMs: 30000,
+        recognitionCompletionTimeoutMs: 60000,
+        queueAdvanceDelayMs: 0,
+      },
+      wakeIntent: {
+        allowRemote: false,
+      },
+      sanitizer: {
+        stripBackticks: true,
+        stripMarkdownArtifacts: true,
+        stripUrlProtocol: true,
+        stripEmoji: true,
+        collapseWhitespace: true,
+        maxTextChars: 5000,
+      },
+    };
+
+    const client = createStreamingTtsClient(config, BASE_OPTIONS);
+    expect(client).toBeInstanceOf(PocketTtsDaemonClient);
   });
 });
