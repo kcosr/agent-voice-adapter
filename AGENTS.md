@@ -48,12 +48,20 @@ When preparing PRs for main, open the PR first to get the PR number, then update
    node scripts/release.mjs patch
    node scripts/release.mjs minor
    node scripts/release.mjs major
+   node scripts/release.mjs 0.2.3
    ```
 
 Notes:
 - Requires the `gh` CLI and an authenticated GitHub session.
-- Script expects a clean working tree, bumps package versions, updates `CHANGELOG.md`, tags `vX.Y.Z`, pushes, and creates a prerelease.
-- `scripts/bump-version.mjs` keeps all `package.json` versions and `package-lock.json` in sync.
+- Script expects a clean, synced `main` branch, runs `npm run check`, bumps
+  package versions, updates `CHANGELOG.md`, tags `vX.Y.Z`, pushes, and creates
+  a prerelease.
+- `scripts/bump-version.mjs` keeps all `package.json` versions and
+  `package-lock.json` in sync.
+- Desktop packages are attached after the GitHub release exists. Stage the
+  macOS ARM DMG and Windows desktop package under `release-assets/vX.Y.Z/`, then
+  run `npm run release:assets -- verify vX.Y.Z release-assets/vX.Y.Z/*` and
+  `npm run release:assets -- upload vX.Y.Z release-assets/vX.Y.Z/*`.
 
 ## Android Debugging Notes
 

@@ -888,15 +888,26 @@ npm run check              # lint + typecheck + test (pre-commit)
 
 ### Release Process
 
-Documented in `AGENTS.md` and automated via `scripts/release.mjs`:
+Documented in `AGENTS.md` and [`docs/release.md`](docs/release.md), and automated via
+`scripts/release.mjs`:
 
 ```bash
 node scripts/release.mjs patch    # Bug fixes
 node scripts/release.mjs minor    # New features
 node scripts/release.mjs major    # Breaking changes
+node scripts/release.mjs 0.2.3    # Explicit version
 ```
 
 The script bumps version in `package.json`/`package-lock.json`, updates `CHANGELOG.md`, commits, tags, pushes, and creates a GitHub prerelease.
+
+Desktop release artifacts are built outside this repo and attached after the
+GitHub release exists. Stage the macOS ARM DMG and Windows desktop package under
+`release-assets/vX.Y.Z/`, then validate/upload them with:
+
+```bash
+npm run release:assets -- verify vX.Y.Z release-assets/vX.Y.Z/*
+npm run release:assets -- upload vX.Y.Z release-assets/vX.Y.Z/*
+```
 
 ## License
 
